@@ -20,12 +20,28 @@ module squares32 : cbrng_engine with t = u32 with k = i64 = {
   type t = u32
   type k = i64
 
-  -- http://stackoverflow.com/a/12996028
-  local def hash (x: i64) : i64 =
-    let x = (x ^ (x >> 16)) * 0x45d9f3b
-    let x = (x ^ (x >> 16)) * 0x45d9f3b
-    in x ^ (x >> 16)
- 
+  -- inline static uint32_t squares32(uint64_t ctr, uint64_t key) {
+  --   uint64_t x, y, z;
+  --   y = x = ctr * key; z = y + key;
+  --   x = x*x + y; x = (x>>32) | (x<<32); /* round 1 */
+  --   x = x*x + z; x = (x>>32) | (x<<32); /* round 2 */
+  --   x = x*x + y; x = (x>>32) | (x<<32); /* round 3 */
+  --   return (x*x + z) >> 32; /* round 4 */
+  -- }
+
   def rand key ctr =
-    ???
+    let round x b =
+      let shift a = (a >> 32) | (a << 32)
+      in (i64.**) x 2 |> (i64.+) b |> shift
+
+    let x = ctr * key
+    let y = ctr * key
+    let z = y + key
+
+    in round x y |> flip (round) z |> flip (round) y
+      |> flip (i64.**) 2 |> (i64.+) z |> flip (>>) 32 |> u32.i64
+
+  def min = u32.min
+
+  def max = u32.max
 }
