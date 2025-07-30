@@ -36,13 +36,14 @@ module squares32 : cbrng_engine with t = u32 with k = i64 = {
     let round x b =
       let shift a = (a >> 32) | (a << 32)
       in (i64.**) x 2 |> (i64.+) b |> shift
-
     let x = ctr * key
     let y = ctr * key
     let z = y + key
-
     in round x y |> flip (round) z |> flip (round) y
-      |> flip (i64.**) 2 |> (i64.+) z |> flip (>>) 32 |> u32.i64
+       |> flip (i64.**) 2
+       |> (i64.+) z
+       |> flip (>>) 32
+       |> u32.i64
 
   def min = u32.lowest
 
@@ -50,29 +51,20 @@ module squares32 : cbrng_engine with t = u32 with k = i64 = {
 
   -- TODO: This implementation is returning `0` values within the hexadecimal representation...
   def construct key =
-
     -- 1) the least significant digit should be odd.
     -- 2) no 0 digits should be used.
     -- 3) the upper 8 digits should be unique.
     -- 4) the lower 8 digits should be unique.
 
     -- Move `idx` to the front of the arr.
-    let to_front 't [n] (x: [n]t) idx : [n]t =
-      [x[idx]] ++ (take idx x) ++ (drop (idx + 1) x) :> [n]t
-
+    let to_front 't [n] (x: [n]t) idx: [n]t = [x[idx]] ++ (take idx x) ++ (drop (idx + 1) x) :> [n]t
     -- For each bit of `k`, shuffle an arr of `1...15` (corresponding to the hex codes `0x1-0xF`).
-    let shuffle k =
-      loop x = 1...15i64 for i < 64 do k >> i |> (i64.&) 14i64 |> to_front x
-
+    let shuffle k = loop x = 1...15i64 for i < 64 do k >> i |> (i64.&) 14i64 |> to_front x
     -- Determine an index of an odd value, then push it to the back of the arr, which will end
     -- up being the least significant bit.
-    let odd [n] (xs: [n]i64) =
-      zip xs (iota n) |> filter (\x -> i64.get_bit 0 x.0 |> (==) 1) |> head |> (.1) |> to_front xs 
-
+    let odd [n] (xs: [n]i64) = zip xs (iota n) |> filter (\x -> i64.get_bit 0 x.0 |> (==) 1) |> head |> (.1) |> to_front xs
     -- Concatenate the arr into a single `i64`.
-    let concat [n] (xs: [n]i64) : i64 =
-      map2 (\idx x_i -> x_i << (idx * 4)) (iota n) xs |> reduce (|) 0i64
-
+    let concat [n] (xs: [n]i64): i64 = map2 (\idx x_i -> x_i << (idx * 4)) (iota n) xs |> reduce (|) 0i64
     let xs = map (shuffle) [key * 0xA, key * 0x7] |> map (odd) |> map (take 8) |> map (concat)
     in ((head xs) << 32) | (last xs)
 }

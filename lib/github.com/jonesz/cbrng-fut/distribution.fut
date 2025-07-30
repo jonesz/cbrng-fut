@@ -20,8 +20,8 @@ module rademacher_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with engine.k = K.t
     with num.t = D.t
+    with engine.k = K.t
     with distribution = K.t = {
   module engine = E
   module num = D
@@ -40,8 +40,8 @@ module gaussian_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with engine.k = K.t
     with num.t = R.t
+    with engine.k = K.t
     with distribution = (K.t, K.t, {mean: R.t, stddev: R.t}) = {
   module engine = E
   module num = R
@@ -71,8 +71,8 @@ module uniform_real_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with engine.k = K.t
     with num.t = R.t
+    with engine.k = K.t
     with distribution = (K.t, {min_r: R.t, max_r: R.t}) = {
   module engine = E
   module num = R

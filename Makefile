@@ -5,8 +5,11 @@ SRC = \
 TEST = \
 	lib/github.com/jonesz/cbrng-fut/distribution_test.fut
 
-test: $(SRC) $(TEST)
-	futhark test $(TEST)
+test: $(TEST) $(SRC)
+	futhark test $<
+
+bench: bench_cbrng_cpprandom.fut $(SRC)
+	futhark bench $<
 
 .PHONY: clean
 
@@ -15,4 +18,5 @@ clean:
 	$(RM) lib/github.com/jonesz/cbrng-fut/*.actual
 	$(RM) lib/github.com/jonesz/cbrng-fut/*.expected
 	$(RM) lib/github.com/jonesz/cbrng-fut/distribution_test
-	
+	$(RM) bench_cbrng_cpprandom
+	$(RM) bench_cbrng_cpprandom.c
