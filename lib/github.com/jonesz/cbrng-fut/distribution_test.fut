@@ -31,3 +31,18 @@ module test_rademacher_f =
 -- compiled random input { i64 100i64 } output { 0.0_f32 1.0_f32 }
 entry test_rademacher k n =
   test_rademacher_f.test n (SQ.construct k)
+
+module test_gaussian_f =
+  mktest_f (gaussian_distribution f32 u32 i64 SQ) f32
+
+-- ==
+-- entry: test_normal
+-- compiled random input { i64 100i64 } output { 0.0_f32 1.0_f32 }
+entry test_normal k n =
+  test_gaussian_f.test n (SQ.construct k, SQ.construct k, {mean = 0.0_f32, stddev = 1.0_f32})
+
+-- ==
+-- entry: test_gaussian
+-- compiled random input { i64 100i64 } output { 5.0_f32 2.0_f32 }
+entry test_gaussian k n =
+  test_gaussian_f.test n (SQ.construct k, SQ.construct k, {mean = 5.0_f32, stddev = 2.0_f32})
