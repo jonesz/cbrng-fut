@@ -64,3 +64,27 @@ module gaussian_distribution
     let theta = i32 2 * pi * u2
     in mean + stddev * (r * cos theta)
 }
+
+module uniform_real_distribution
+  (R: real)
+  (T: integral)
+  (K: integral)
+  (E: cbrng_engine with t = T.t with k = K.t)
+  : cbrng_distribution
+    with engine.k = K.t
+    with num.t = R.t
+    with distribution = (K.t, {min_r: R.t, max_r: R.t}) = {
+  module engine = E
+  module num = R
+
+  type distribution = (K.t, {min_r: R.t, max_r: R.t})
+
+  -- Straight port from `diku-dk/cpprandom/random.fut`.
+  def to_R (x: E.t) =
+    R.u64 (u64.i64 (T.to_i64 x))
+
+  def rand (k: K.t, {min_r = min_r: R.t, max_r = max_r: R.t}) ctr =
+    let x = E.rand k ctr
+    let x' = R.((to_R x - to_R E.min) / (to_R E.max - to_R E.min))
+    in R.(min_r + x' * (max_r - min_r))
+}
