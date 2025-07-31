@@ -20,8 +20,8 @@ module rademacher_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with engine.k = K.t
     with num.t = D.t
+    with engine.k = K.t
     with distribution = K.t = {
   module engine = E
   module num = D
@@ -40,8 +40,8 @@ module gaussian_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with engine.k = K.t
     with num.t = R.t
+    with engine.k = K.t
     with distribution = (K.t, K.t, {mean: R.t, stddev: R.t}) = {
   module engine = E
   module num = R
@@ -56,9 +56,9 @@ module gaussian_distribution
 
   def rand (k1, k2, {mean = mean: R.t, stddev = stddev: R.t}) ctr =
     -- Box-Muller where we only use one of the generated points.
-     let (u1, u2) =
-       let xs = map (flip (E.rand) ctr) [k1, k2] |> map (\u_i -> (to_R u_i - to_R E.min) / (to_R E.max - to_R E.min))
-       in (head xs, last xs)
+    let (u1, u2) =
+      let xs = map (flip (E.rand) ctr) [k1, k2] |> map (\u_i -> (to_R u_i - to_R E.min) / (to_R E.max - to_R E.min))
+      in (head xs, last xs)
     let r = sqrt (i32 (-2) * log u1)
     let theta = i32 2 * pi * u2
     in mean + stddev * (r * cos theta)
@@ -70,8 +70,8 @@ module uniform_real_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with engine.k = K.t
     with num.t = R.t
+    with engine.k = K.t
     with distribution = (K.t, {min_r: R.t, max_r: R.t}) = {
   module engine = E
   module num = R
@@ -86,4 +86,29 @@ module uniform_real_distribution
     let x = E.rand k ctr
     let x' = R.((to_R x - to_R E.min) / (to_R E.max - to_R E.min))
     in R.(min_r + x' * (max_r - min_r))
+}
+
+module uniform_int_distribution
+  (D: numeric)
+  (T: integral)
+  (K: integral)
+  (E: cbrng_engine with t = T.t with k = K.t)
+  : cbrng_distribution
+    with engine.k = K.t
+    with num.t = D.t
+    with distribution = (K.t, {min_i: D.t, max_i: D.t}) = {
+  module engine = E
+  module num = D
+
+  type distribution = (K.t, {min_i: D.t, max_i: D.t})
+
+  module UR = uniform_real_distribution f32 T K E
+
+  def rand (k: K.t, {min_i = min_i: D.t, max_i = max_i: D.t}) ctr =
+    -- Generate a number between `[0, 1)`, scale it by the range, floor to `{0, ..., N-1}`, then shift by `D_min`.
+    (D.-) max_i min_i |> (D.+) (D.i64 1) |> D.to_i64 |> f32.i64
+    |> (f32.*) (UR.rand (k, {min_r = 0.0_f32, max_r = 1.0_f32}) ctr)
+    |> f32.floor
+    |> D.f32
+    |> (D.+) min_i
 }
