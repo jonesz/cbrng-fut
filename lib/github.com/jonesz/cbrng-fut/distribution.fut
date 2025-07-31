@@ -20,8 +20,8 @@ module rademacher_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with num.t = D.t
     with engine.k = K.t
+    with num.t = D.t
     with distribution = K.t = {
   module engine = E
   module num = D
@@ -40,8 +40,8 @@ module gaussian_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with num.t = R.t
     with engine.k = K.t
+    with num.t = R.t
     with distribution = (K.t, K.t, {mean: R.t, stddev: R.t}) = {
   module engine = E
   module num = R
@@ -56,10 +56,9 @@ module gaussian_distribution
 
   def rand (k1, k2, {mean = mean: R.t, stddev = stddev: R.t}) ctr =
     -- Box-Muller where we only use one of the generated points.
-    let u1 = E.rand k1 ctr
-    let u2 = E.rand k2 ctr
-    let u1 = (to_R u1 - to_R E.min) / (to_R E.max - to_R E.min)
-    let u2 = (to_R u2 - to_R E.min) / (to_R E.max - to_R E.min)
+     let (u1, u2) =
+       let xs = map (flip (E.rand) ctr) [k1, k2] |> map (\u_i -> (to_R u_i - to_R E.min) / (to_R E.max - to_R E.min))
+       in (head xs, last xs)
     let r = sqrt (i32 (-2) * log u1)
     let theta = i32 2 * pi * u2
     in mean + stddev * (r * cos theta)
@@ -71,8 +70,8 @@ module uniform_real_distribution
   (K: integral)
   (E: cbrng_engine with t = T.t with k = K.t)
   : cbrng_distribution
-    with num.t = R.t
     with engine.k = K.t
+    with num.t = R.t
     with distribution = (K.t, {min_r: R.t, max_r: R.t}) = {
   module engine = E
   module num = R
