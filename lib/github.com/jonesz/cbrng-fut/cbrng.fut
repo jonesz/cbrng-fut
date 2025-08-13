@@ -49,7 +49,6 @@ module squares32 : cbrng_engine with t = u32 with k = i64 = {
 
   def max = u32.highest
 
-  -- TODO: This implementation is returning `0` values within the hexadecimal representation...
   def construct key =
     -- 1) the least significant digit should be odd.
     -- 2) no 0 digits should be used.
