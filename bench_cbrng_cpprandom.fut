@@ -1,10 +1,10 @@
 import "lib/github.com/diku-dk/cpprandom/random"
 import "lib/github.com/jonesz/cbrng-fut/cbrng"
 
-module mk_bench_cbrng (T: integral) (K: integral) (E: cbrng_engine with t = T.t with k = K.t) = {
-  def bench (k: K.t) (n: i64) =
+module mk_bench_cbrng (T: integral) (E: cbrng_engine with t = T.t) = {
+  def bench k (n: i64) =
     let k = E.construct k
-    in map (E.rand k) (iota n) |> reduce (T.+) (T.i64 0)
+    in tabulate n (E.rand k) |> reduce (T.+) (T.i64 0)
 }
 
 module mk_bench_rng (T: integral) (E: rng_engine with t = T.t) = {
@@ -14,7 +14,7 @@ module mk_bench_rng (T: integral) (E: rng_engine with t = T.t) = {
     in reduce (T.+) (T.i64 0) xs
 }
 
-module squares_bench = mk_bench_cbrng u32 i64 squares32
+module squares_bench = mk_bench_cbrng u32 squares32
 module minstd_rand_bench = mk_bench_rng u32 minstd_rand
 module xorshift128plus_bench = mk_bench_rng u64 xorshift128plus
 
