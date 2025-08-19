@@ -7,14 +7,11 @@ module type cbrng_distribution = {
   -- | A module describing the type of values produced by this random distribution.
   module num: numeric
 
-  -- | The seed utilized for this distribution.
-  type seed
-
   -- | The dynamic configuration of the distribution.
   type distribution
 
   -- | Generate a random number given a seed, a distribution, and a counter.
-  val rand : seed -> distribution -> i64 -> num.t
+  val rand : engine.k -> distribution -> i64 -> num.t
 }
 
 module rademacher_distribution
@@ -22,13 +19,12 @@ module rademacher_distribution
   (T: integral)
   (E: cbrng_engine with t = T.t)
   : cbrng_distribution
-    with seed = E.k
     with num.t = D.t
+    with engine.k = E.k
     with distribution = () = {
   module engine = E
   module num = D
 
-  type seed = E.k
   type distribution = ()
 
   def rand seed _ ctr =
@@ -42,13 +38,12 @@ module gaussian_distribution
   (T: integral)
   (E: cbrng_engine with t = T.t)
   : cbrng_distribution
-    with seed = E.k
     with num.t = R.t
+    with engine.k = E.k
     with distribution = {mean: R.t, stddev: R.t} = {
   module engine = E
   module num = R
 
-  type seed = E.k
   type distribution = {mean: R.t, stddev: R.t}
 
   -- Straight port from `diku-dk/cpprandom/random.fut`.
@@ -73,13 +68,12 @@ module uniform_real_distribution
   (T: integral)
   (E: cbrng_engine with t = T.t)
   : cbrng_distribution
-    with seed = E.k
     with num.t = R.t
+    with engine.k = E.k
     with distribution = {min_r: R.t, max_r: R.t} = {
   module engine = E
   module num = R
 
-  type seed = E.k
   type distribution = {min_r: R.t, max_r: R.t}
 
   -- Straight port from `diku-dk/cpprandom/random.fut`.
@@ -97,13 +91,12 @@ module uniform_int_distribution
   (T: integral)
   (E: cbrng_engine with t = T.t)
   : cbrng_distribution
-    with seed = E.k
     with num.t = D.t
+    with engine.k = E.k
     with distribution = {min_i: D.t, max_i: D.t} = {
   module engine = E
   module num = D
 
-  type seed = E.k
   type distribution = {min_i: D.t, max_i: D.t}
   module UR = uniform_real_distribution f32 T E
 
