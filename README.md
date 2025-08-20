@@ -22,3 +22,7 @@ let xs = tabulate 100 (squares32.rand s)
 module R = rademacher_distribution f32 u32 squares32
 let xs = tabulate 100 (R.rand s ())
 ```
+
+## Documentation
+
+`make doc` will place package documentation in `./doc`.
