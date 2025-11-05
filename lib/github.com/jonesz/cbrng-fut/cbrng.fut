@@ -15,7 +15,7 @@ module type cbrng_engine = {
   val max : t
 
   -- | Construct a valid key.
-  val construct : (key: k) -> k
+  val construct : i64 -> k
 }
 
 -- | [Squares: A Fast Counter-Based RNG](https://arxiv.org/pdf/2004.06278)
